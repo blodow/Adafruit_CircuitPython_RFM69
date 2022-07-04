@@ -82,6 +82,7 @@ _REG_RX_BW = const(0x19)
 _REG_AFC_BW = const(0x1A)
 _REG_RSSI_VALUE = const(0x24)
 _REG_DIO_MAPPING1 = const(0x25)
+_REG_DIO_MAPPING2 = const(0x26)
 _REG_IRQ_FLAGS1 = const(0x27)
 _REG_IRQ_FLAGS2 = const(0x28)
 _REG_PREAMBLE_MSB = const(0x2C)
@@ -89,6 +90,7 @@ _REG_PREAMBLE_LSB = const(0x2D)
 _REG_SYNC_CONFIG = const(0x2E)
 _REG_SYNC_VALUE1 = const(0x2F)
 _REG_PACKET_CONFIG1 = const(0x37)
+_REG_PAYLOAD_LENGTH = const(0x38)
 _REG_FIFO_THRESH = const(0x3C)
 _REG_PACKET_CONFIG2 = const(0x3D)
 _REG_AES_KEY1 = const(0x3E)
@@ -106,7 +108,7 @@ _TEST_PA2_BOOST = const(0x7C)
 # The crystal oscillator frequency and frequency synthesizer step size.
 # See the datasheet for details of this calculation.
 _FXOSC = 32000000.0
-_FSTEP = _FXOSC / 524288
+_FSTEP = _FXOSC / 0x80000
 
 # RadioHead specific compatibility constants.
 _RH_BROADCAST_ADDRESS = const(0xFF)
@@ -253,6 +255,7 @@ class RFM69:
     temp_start = _RegisterBits(_REG_TEMP1, offset=3)
     temp_running = _RegisterBits(_REG_TEMP1, offset=2)
     sync_on = _RegisterBits(_REG_SYNC_CONFIG, offset=7)
+    fifo_fill_condition = _RegisterBits(_REG_SYNC_CONFIG, offset=6, bits=1)
     sync_size = _RegisterBits(_REG_SYNC_CONFIG, offset=3, bits=3)
     aes_on = _RegisterBits(_REG_PACKET_CONFIG2, offset=0)
     pa_0_on = _RegisterBits(_REG_PA_LEVEL, offset=7)
@@ -270,8 +273,15 @@ class RFM69:
     crc_on = _RegisterBits(_REG_PACKET_CONFIG1, offset=4, bits=1)
     crc_auto_clear_off = _RegisterBits(_REG_PACKET_CONFIG1, offset=3, bits=1)
     address_filter = _RegisterBits(_REG_PACKET_CONFIG1, offset=1, bits=2)
+    payload_length = _RegisterBits(_REG_PAYLOAD_LENGTH, offset=0, bits=8)
     mode_ready = _RegisterBits(_REG_IRQ_FLAGS1, offset=7)
     dio_0_mapping = _RegisterBits(_REG_DIO_MAPPING1, offset=6, bits=2)
+    dio_1_mapping = _RegisterBits(_REG_DIO_MAPPING1, offset=4, bits=2)
+    dio_2_mapping = _RegisterBits(_REG_DIO_MAPPING1, offset=2, bits=2)
+    dio_3_mapping = _RegisterBits(_REG_DIO_MAPPING1, offset=0, bits=2)
+    dio_4_mapping = _RegisterBits(_REG_DIO_MAPPING2, offset=6, bits=2)
+    dio_5_mapping = _RegisterBits(_REG_DIO_MAPPING2, offset=4, bits=2)
+    clk_out = _RegisterBits(_REG_DIO_MAPPING2, offset=0, bits=3)
 
     # pylint: disable=too-many-statements
     def __init__(
