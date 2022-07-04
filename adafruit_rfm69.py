@@ -852,6 +852,40 @@ class RFM69:
         self.flags = 0  # clear flags
         return got_ack
 
+    def receive_raw(
+        self, *, keep_listening=True, timeout=None
+    ):
+        timed_out = False
+        if timeout is None:
+            timeout = self.receive_timeout
+        if timeout is not None:
+            # Wait for the payload_ready signal.  This is not ideal and will
+            # surely miss or overflow the FIFO when packets aren't read fast
+            # enough, however it's the best that can be done from Python without
+            # interrupt supports.
+            # Make sure we are listening for packets.
+            self.listen()
+            timed_out = check_timeout(self.payload_ready, timeout)
+        # Payload ready is set, a packet is in the FIFO.
+        packet = None
+        # save last RSSI reading
+        self.last_rssi = self.rssi
+        # Enter idle mode to stop receiving other packets.
+        self.idle()
+        if not timed_out:
+            packet = bytearray()
+            while self.fifo_not_empty():
+                packet.append(self._read_u8(_REG_FIFO))
+            if len(packet) == 0:
+                packet = None
+        # Listen again if necessary and return the result packet.
+        if keep_listening:
+            self.listen()
+        else:
+            # Enter idle mode to stop receiving other packets.
+            self.idle()
+        return packet
+
     def receive(
         self, *, keep_listening=True, with_ack=False, timeout=None, with_header=False
     ):
