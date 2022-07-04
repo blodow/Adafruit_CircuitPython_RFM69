@@ -744,6 +744,10 @@ class RFM69:
         """Receive status"""
         return (self._read_u8(_REG_IRQ_FLAGS2) & 0x4) >> 2
 
+    def fifo_not_empty(self):
+        """Receive status"""
+        return (self._read_u8(_REG_IRQ_FLAGS2) & 0x40) >> 6
+
     # pylint: disable=too-many-branches
     def send(
         self,
